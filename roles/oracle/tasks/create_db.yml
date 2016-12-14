@@ -6,10 +6,11 @@
 
 - name: create a new database config params file
   expect:
-    command: oakcli create db_config_params -conf { database_name }}-expect.out
+    command: ssh {{ ansible_ssh_user }}@{{ ansible_ssh_host }} oakcli create db_config_params -conf { database_name }}-expect.out
     responses:
       'Database Block Size': '2'
       'Database Language': '1'
       'Database Characterset': '87'
       'Database Territory': '1'
       'Component Language': '1'
+  delegate_to: 127.0.0.1

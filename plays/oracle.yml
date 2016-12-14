@@ -1,6 +1,4 @@
 ---
 - hosts: oracle
-  become: yes
-  become_user: root
   roles:
     - ../roles/oracle
