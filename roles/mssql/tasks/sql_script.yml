@@ -1,3 +1,0 @@
----
-- name: run sql script
-  script: create_db.ps1
