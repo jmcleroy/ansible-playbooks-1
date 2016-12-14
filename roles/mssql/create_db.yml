@@ -1,0 +1,8 @@
+---
+- name: create db
+  hosts: all
+  tasks: 
+  - name: Run create DB Script
+    script: create_db.ps1 -instanceName {{ mssql.instance_name }} -dbName {{ mssql.db_name }}
+
+

@@ -1,0 +1,7 @@
+---
+- name: Run SQL Command in Instance
+  hosts: all
+  tasks:
+  - name: Execute run sql command on instance script
+    script: run_sql_command.ps1 -instanceName {{ mssql.instance_name }} -sqlQuery "{{ mssql.sql_query }}"
+

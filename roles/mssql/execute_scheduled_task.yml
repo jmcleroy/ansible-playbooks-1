@@ -1,0 +1,7 @@
+---
+- name: Execute Scheduled Task
+  hosts: all
+  tasks:
+  - name: Run execute scheduled task script
+    script: execute_scheduled_task.ps1 -instanceName {{ mssql.instance_name }} -dbName {{ mssql.db_name }} -jobName {{ mssql.job_name }}
+

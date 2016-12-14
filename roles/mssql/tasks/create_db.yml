@@ -1,5 +1,0 @@
----
-- name: create db
-  script: create_db.ps1 -instanceName {{ mssql.instance_name }} -dbName {{ mssql.db_name }}
-
-
