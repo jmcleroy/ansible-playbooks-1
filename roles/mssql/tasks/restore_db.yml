@@ -1,3 +1,0 @@
----
-- name: restore db
-  script: create_db.ps1
