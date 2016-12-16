@@ -1,0 +1,101 @@
+---
+
+- name: Remove F5 VIP, pool, pool members
+  hosts: all
+  connection: local
+  #vars_files:
+  #- vars/main.yml
+
+  tasks:
+   - name: Remove a VIP
+     bigip_virtual_server:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       state: "absent"
+       description: "{{ vip_name }}_80"
+       destination: "{{ vip_ip }}"
+       name: "{{ vip_name }}_80"
+       #pool: "{{ pool }}"
+       port: "80"
+       snat: "Automap"
+       all_profiles:
+           - "http_encrypt_cookie"
+           - "tcp"
+       all_rules:
+           - "SSL_Redirect"
+
+   - name: Remove a VIP
+     bigip_virtual_server:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       state: "absent"
+       description: "{{ vip_name }}_443"
+       destination: "{{ vip_ip }}"
+       name: "{{ vip_name }}_443"
+       pool: "{{ pool }}"
+       port: "443"
+       snat: "Automap"
+       default_persistence_profile: "source_addr"
+       all_profiles:
+           - http_encrypt_cookie
+           #- "tcp"
+           - tcp-lan-optimized
+           - clientssl
+           #- "source_addr"
+
+   # Remove nodes from pool fails if the nodes don't exist.  
+   # Need to add a 'get pools' task and update remove nodes from pool
+   # to only execute if the node exists
+   - name: Remove nodes from pool
+     bigip_pool_member:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       description: "{{ item.name }}"
+       state: "absent"
+       host: "{{ item.host }}"
+       name: "{{ item.name }}"
+       pool: "{{ pool }}"
+       port: "80"
+       validate_certs: "no"
+     with_items: "{{ nodes }}"
+
+   # Not needed - removing node from pool deletes the node...
+   #- name: Remove Nodes
+   #  bigip_node:
+   #    server: "{{ f5_server }}"
+   #    user: "{{ f5_user }}"
+   #    password: "{{ f5_password }}"
+   #    validate_certs: "no"
+   #    state: "absent"
+   #    name: "{{ item.name }}"
+   #  with_items: "{{ nodes }}"
+
+   - name: Remove pool
+     bigip_pool:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       lb_method: "ratio_member"
+       state: "absent"
+       name: "{{ pool }}"
+       slow_ramp_time: "120"
+       validate_certs: "no"
+       monitors:
+           - "{{ monitor_name }}"
+
+   - name: BIGIP F5 | Remove HTTP Monitor
+     bigip_monitor_http:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       state: "absent"
+       name: "{{ monitor_name }}"
+       send: "GET /"
+       receive: "200 OK"
+

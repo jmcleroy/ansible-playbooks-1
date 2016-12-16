@@ -1,0 +1,14 @@
+---
+#f5_server: ~
+#f5_user: ~
+#f5_password: ~
+pool: "ansible_pool_80"
+nodes:
+  - name: 'ansible-1'
+    host: '10.10.20.10' 
+  - name: 'ansible-2'
+    host: '10.10.20.20'
+monitor_name: "ansible_http_monitor"
+vip_name: "ansible_vip"  # Note this will create an 80 and 443 VIP
+vip_ip: "172.16.10.108"
+

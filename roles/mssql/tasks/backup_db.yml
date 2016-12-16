@@ -1,7 +1,0 @@
----
-- name: Backup DB
-  hosts: all
-  tasks:
-  - name: Run backup db script
-    script: backup_db.ps1 -instanceName {{ mssql.instance_name }} -dbName {{ mssql.db_name }}
-

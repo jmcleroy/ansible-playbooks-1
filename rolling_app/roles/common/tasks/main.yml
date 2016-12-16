@@ -1,0 +1,49 @@
+---
+# This role contains common plays that will run on all nodes.
+
+- name: Install python bindings for SE Linux
+  yum: name={{ item }} state=present
+  with_items:
+   - libselinux-python
+   - libsemanage-python
+
+- name: install EPEL repo
+  yum:
+      name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+      state: present
+  ignore_errors: true
+
+- name: install some useful nagios plugins
+  yum: name={{ item }} state=present
+  with_items:
+   - nagios-nrpe
+   - nagios-plugins-swap
+   - nagios-plugins-users
+   - nagios-plugins-procs
+   - nagios-plugins-load
+   - nagios-plugins-disk
+  ignore_errors: true
+
+- name: Install chrony
+  yum: name=chrony state=present
+  tags: chrony
+
+#- name: Configure chrony file
+#  template: src=chrony.conf.j2 dest=/etc/chrony.conf
+#  tags: chrony
+#  notify: restart chrony
+
+- name: Start the chrony service
+  service: name=chronyd state=started enabled=yes
+  tags: chrony
+
+# work around RHEL 7, for now
+- name: insert iptables template
+  template: src=iptables.j2 dest=/etc/sysconfig/iptables
+  when: ansible_distribution_major_version != '7'
+  notify: restart iptables
+
+- name: test to see if selinux is running
+  command: getenforce
+  register: sestatus
+  changed_when: false

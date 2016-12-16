@@ -1,0 +1,5 @@
+---
+- name: Copy the code from repository
+  #git: repo={{ repository }} version={{ webapp_version }} dest=/vars/www/html/
+  shell: git clone "{{ repository }}" /var/www/html/; cd /var/www/html; git pull; git checkout tags/{{ webapp_version }}; chmod 655 -R *
+

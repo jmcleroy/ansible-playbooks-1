@@ -1,0 +1,43 @@
+---
+## This playbook deploys the whole application stack in this site.  
+
+# Apply common configuration to all hosts
+- hosts: all
+  become: yes
+  become_user: root
+  roles:
+  - common
+
+# Configure and deploy database servers.
+- hosts: dbservers
+
+  roles:
+  - mysql
+  become: yes
+  become_user: root
+  tags:
+  - db
+
+# Configure and deploy the web servers. Note that we include two roles here,
+# the 'base-apache' role which simply sets up Apache, and 'web' which includes
+# our example web application.
+- hosts: webservers
+
+  roles:
+  - base-apache
+  - web
+  become: yes
+  become_user: root
+  tags:
+  - web
+
+# Configure and deploy the load balancer(s).
+- hosts: lbservers
+
+  roles:
+  - haproxy
+  become: yes
+  become_user: root
+  tags:
+  - lb
+

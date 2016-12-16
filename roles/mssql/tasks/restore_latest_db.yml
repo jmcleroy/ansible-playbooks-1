@@ -1,7 +1,0 @@
----
-- name: Restore DB from latest Backup
-  hosts: all
-  tasks:
-  - name: Run restore db from latest backup script
-    script: restore_latest_db.ps1 -instanceName {{ mssql.instance_name }} -dbName {{ mssql.db_name }} 
-

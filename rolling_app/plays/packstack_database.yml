@@ -1,0 +1,53 @@
+---
+- name: Deploy on OpenStack
+  hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Deploy instances
+    os_server:
+         state: present
+         auth:
+           auth_url: http://192.168.2.2:5000/v2.0
+           username: admin
+           password: r3dh4t!
+           project_name: admin
+         name: "{{ item }}"
+         image: rhel73
+         key_name: default
+         timeout: 200
+         flavor: 2
+         auto_ip: yes
+         nics:
+           - net-name: private_network
+         meta:
+           hostname: "{{ item }}.home.ad"
+           group: dbservers
+    register: newnode
+    with_items:
+      - db1
+
+  - name: add instances
+    add_host: name="{{ item.server.public_v4 }}"
+                groups=dbservers
+                ansible_user=cloud-user
+                instance_name={{ item.server.metadata.hostname }}
+                ansible_ssh_private_key_file='/Users/oatakan/Downloads/default.pem'
+                ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    with_items: "{{ newnode.results }}"
+    when: newnode|success
+
+  - name: waiting for server to come online
+    local_action: wait_for host="{{ item.server.public_v4 }}" port=22 search_regex=OpenSSH delay=10
+    become: false
+    with_items: "{{ newnode.results }}"
+
+- hosts: dbservers
+
+  roles:
+  - ../roles/rhn
+  - ../roles/common
+  - ../roles/mysql
+  become: yes
+  become_user: root
+  tags:
+  - db

@@ -1,0 +1,7 @@
+---
+- name: Create user
+  hosts: all
+  tasks:
+  - name: Run create user script
+    script: create_user_on_db.ps1 -instanceName {{ instance_name }} -dbName {{ db_name }} -dbUser {{ db_user }} -dbPassword {{ db_password }} -dbRole {{ db_role }}
+

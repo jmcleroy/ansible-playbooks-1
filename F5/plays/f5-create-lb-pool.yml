@@ -1,0 +1,127 @@
+---
+
+- name: Create F5 VIP, pool, pool members
+  hosts: all
+  connection: local
+  #vars_files:
+  #- vars/main.yml
+
+### Update to feed name & port and have it update objects accordingly ###
+#
+#### NEED ONE FLOW TO FEED TO ANOTHER
+### PROV 2 VMs - > Then use the 2 VMs as inputs... 
+# We want Infoblox to provision next available IP for the VIP as well... 
+#### Need to code this on the Ansible side as well...
+
+  tasks:
+   #- name: BIGIP F5 | Get Facts
+   #  bigip_facts: 
+   #    server: "{{ f5_server }}"
+   #    user: "{{ f5_user }}"
+   #    password: "{{ f5_password }}"
+   #    validate_certs: "no"
+   #    include: "client_ssl_profile,virtual_server" 
+   #
+   #- debug: var=hostvars
+
+   - name: BIGIP F5 | Create HTTP Monitor
+     bigip_monitor_http:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       state: "present"
+       name: "{{ monitor_name }}"
+       send: "GET /"
+       receive: "200 OK"
+
+   - name: Create a pool
+     bigip_pool:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       lb_method: "ratio_member"
+       name: "{{ pool }}"
+       slow_ramp_time: "120"
+       validate_certs: "no"
+       monitors:
+           - "{{ monitor_name }}"
+
+   - name: Create Nodes
+     bigip_node:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       host: "{{ item.host }}"
+       name: "{{ item.name }}"
+     with_items: "{{ nodes }}"
+
+   - name: Add nodes to pool
+     bigip_pool_member:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       description: "{{ item.name }}"
+       host: "{{ item.host }}"
+       name: "{{ item.name }}"
+       pool: "{{ pool }}"
+       port: "80"
+       validate_certs: "no"
+     with_items: "{{ nodes }}" 
+
+# Create a new certificate 
+##SSL -> Client 
+##  -> Create a sample ssl profile (clientssl parent) 
+##    -> Create cert -- outside of F5 UI... 
+##    -> Import cert (bigip_ssl_certificate)
+##  -> During add vip - Use the SSL profile you created under 'all_profiles' 
+
+# In UI:
+# System -> File Management -> SSL Certificates -> Can use self-signed for lab...
+#
+
+
+# HOW TO CREATE SSL PROFILE 
+#### IBM UCD DIDN'T DO THIS
+
+   # Add a VIP
+   - name: Create a VIP
+     bigip_virtual_server:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       description: "{{ vip_name }}_80"
+       destination: "{{ vip_ip }}"
+       name: "{{ vip_name }}_80"
+       #pool: "{{ pool }}"
+       port: "80"
+       snat: "Automap"
+       all_profiles:
+           - "http_encrypt_cookie"
+           - "tcp"
+       all_rules:
+           - "SSL_Redirect"
+
+### TO DO: FIND OUT WHY WE CAN'T USE tcp-lan-optimized OR tcp_20 OR tcp7 for Client profile  -> tcp7 should be fine... 
+   - name: Create a VIP
+     bigip_virtual_server:
+       server: "{{ f5_server }}"
+       user: "{{ f5_user }}"
+       password: "{{ f5_password }}"
+       validate_certs: "no"
+       description: "{{ vip_name }}_443"
+       destination: "{{ vip_ip }}"
+       name: "{{ vip_name }}_443"
+       pool: "{{ pool }}"
+       port: "443"
+       snat: "Automap"
+       default_persistence_profile: "source_addr"
+       all_profiles:
+           - http_encrypt_cookie
+           - "tcp"
+           #- tcp-lan-optimized
+           - clientssl
+           #- "source_addr"
+

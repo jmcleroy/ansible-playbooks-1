@@ -1,0 +1,132 @@
+---
+- name: Deploy on OpenStack
+  hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Deploy instances
+    os_server:
+         state: present
+         auth:
+           auth_url: http://10.62.30.24:5000/v2.0
+           username: admin
+           password: 97632d00cc7e486d
+           project_name: admin
+         name: "{{ item }}"
+         image: rhel-guest-7.2
+         key_name: adminkey
+         timeout: 200
+         flavor: 2
+         auto_ip: yes
+         nics:
+           - net-name: privnet1
+         meta:
+           hostname: "{{ item }}"
+           group: rolling_app
+    register: newnode
+    with_items:
+      - web1
+      - web2
+      - db1
+      - lb1
+
+  - name: add instances to webservers groups
+    add_host: name="{{ item.server.metadata.hostname }}"
+                groups=webservers
+                ansible_user=cloud-user
+                instance_name={{ item.server.metadata.hostname }}
+                ansible_host="{{ item.server.public_v4 }}"
+                ansible_ssh_private_key_file='/Users/oatakan/Downloads/adminkey_aa1.pem'
+                ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    with_items: "{{ newnode.results }}"
+    when: (newnode|success) and ("'web' in item")
+
+  - name: add instances to dbservers groups
+    add_host: name="{{ item.server.metadata.hostname }}"
+                groups=dbservers
+                ansible_user=cloud-user
+                instance_name={{ item.server.metadata.hostname }}
+                ansible_host="{{ item.server.public_v4 }}"
+                ansible_ssh_private_key_file='/Users/oatakan/Downloads/default.pem'
+                ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    with_items: "{{ newnode.results }}"
+    when: (newnode|success) and ("'db' in item")
+
+  - name: add instances to lbservers groups
+    add_host: name="{{ item.server.metadata.hostname }}"
+                groups=lbservers
+                ansible_user=cloud-user
+                instance_name={{ item.server.metadata.hostname }}
+                ansible_host="{{ item.server.public_v4 }}"
+                ansible_ssh_private_key_file='/Users/oatakan/Downloads/default.pem'
+                ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    with_items: "{{ newnode.results }}"
+    when: (newnode|success) and ("'lb' in item")
+
+  - name: add instances to monitoring groups
+    add_host: name="{{ item.server.metadata.hostname }}"
+                groups=monitoring
+                ansible_user=cloud-user
+                instance_name={{ item.server.metadata.hostname }}
+                ansible_host="{{ item.server.public_v4 }}"
+                ansible_ssh_private_key_file='/Users/oatakan/Downloads/default.pem'
+                ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    with_items: "{{ newnode.results }}"
+    when: (newnode|success) and ("'nagios' in item")
+
+  - name: waiting for server to come online
+    local_action: wait_for host="{{ item.server.public_v4 }}" port=22 search_regex=OpenSSH delay=10
+    become: false
+    with_items: "{{ newnode.results }}"
+
+# Apply common configuration to all hosts
+- hosts: all
+  become: yes
+  become_user: root
+  roles:
+  - ../roles/rhn
+  - ../roles/common
+
+# Configure and deploy database servers.
+- hosts: dbservers
+
+  roles:
+  - ../../ansible-role-mysql
+  become: yes
+  become_user: root
+  tags:
+  - db
+
+# Configure and deploy the web servers. Note that we include two roles here,
+# the 'base-apache' role which simply sets up Apache, and 'web' which includes
+# our example web application.
+- hosts: webservers
+
+  roles:
+  - ../roles/base-apache
+  - ../roles/web
+  become: yes
+  become_user: root
+  tags:
+  - web
+
+# Configure and deploy the load balancer(s).
+- hosts: lbservers
+
+  roles:
+  - ../roles/haproxy
+  become: yes
+  become_user: root
+  tags:
+  - lb
+
+# Configure and deploy the Nagios monitoring node(s).
+- hosts: monitoring
+  become: yes
+  become_user: root
+  roles:
+  - ../roles/base-apache
+  - ../roles/nagios
+
+  tags:
+  - monitoring
+

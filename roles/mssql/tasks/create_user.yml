@@ -1,7 +1,0 @@
----
-- name: Create user
-  hosts: all
-  tasks:
-  - name: Run create user script
-    script: create_user_on_db.ps1 -instanceName {{ mssql.instance_name }} -dbName {{ mssql.db_name }} -dbUser {{ mssql.db_user }} -dbPassword {{ mssql.db_password }} -dbRole {{ mssql.db_role }}
-

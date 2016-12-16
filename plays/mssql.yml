@@ -1,4 +1,0 @@
----
-- hosts: mssql
-  roles:
-    - ../roles/mssql
