@@ -22,6 +22,7 @@
   when: rhn_subscription is defined
 
 - debug: msg="{{ pool_id.stdout }}"
+  when: rhn_subscription is defined
 
 - name: add pool
   command: subscription-manager attach --pool={{ pool_id.stdout }}
@@ -30,7 +31,7 @@
   retries: 5
   delay: 10
   ignore_errors: yes
-  when: pool_id|success and pool_id.stdout != ''
+  when: rhn_subscription is defined and pool_id|success and pool_id.stdout != ''
   tags:
     - rhn
 
@@ -39,12 +40,14 @@
   command: subscription-manager repos --disable "*"
   tags:
     - rhn
+  when: rhn_subscription is defined
 
 - name: enable required repositories
   command: subscription-manager repos --enable={{ item }}
   with_items: "{{ repo_channels }}"
   tags:
     - rhn
+  when: rhn_subscription is defined
 
 - name: install yum-utils package
   yum: name=yum-utils state=latest
