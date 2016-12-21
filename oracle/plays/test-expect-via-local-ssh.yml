@@ -5,8 +5,6 @@
 
   tasks:
 
-    - debug: msg="{{ hostvars }}"
-
     - name: run test file
       expect:
         command: ssh -i /tmp/openstack-default.pem {{ ansible_ssh_user }}@{{ ansible_ssh_host }} /home/cloud-user/test_expect.sh
