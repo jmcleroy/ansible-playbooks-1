@@ -31,11 +31,13 @@ defaults
 
 backend app
     {% for host in groups.lbservers %}
+        {% if host in play_hosts %}
     	listen {{ daemonname }} 0.0.0.0:{{ listenport }}
+    	{% endif %}
     {% endfor %}
     balance     {{ balance }}
     {% for host in groups.webservers %}
-        {% if host in vars['play_hosts'] %}
-            server {{ host }} {{ hostvars[host]['ansible_' + iface].ipv4.address }}:{{ httpd_port }}
+        {% if host in play_hosts %}
+        server {{ host }} {{ hostvars[host]['ansible_' + iface].ipv4.address }}:{{ httpd_port }}
         {% endif %}
     {% endfor %}
