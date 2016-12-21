@@ -1,9 +1,11 @@
 ---
-
 - name: text expect
   hosts: all
 
   tasks:
+
+    - name: copy test_expect.sh file
+      copy: src=test_expect.sh dest=/home/cloud-user/ mode=0744
 
     - name: run test file
       expect:
