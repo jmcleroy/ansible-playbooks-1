@@ -10,8 +10,8 @@
 - debug: msg="{{ item }}"
   with_items: "{{ groups['webservers'] }}
 
-- debug: msg="{{ hostvars[groups['webservers'][0]]['ansible_ens160'] }}"
-- debug: msg="{{ hostvars[groups['webservers'][1]]['ansible_ens160'] }}"
+- debug: msg="{{ hostvars[groups['webservers'][0]].ansible_ens160 }}"
+- debug: msg="{{ hostvars[groups['webservers'][1]].ansible_ens160 }}"
 
 - name: Configure the haproxy cnf file with hosts
   template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
