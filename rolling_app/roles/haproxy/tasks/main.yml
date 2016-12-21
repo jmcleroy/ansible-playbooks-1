@@ -7,7 +7,7 @@
 - name: Download and install haproxy
   yum: name=haproxy state=present
 
-- debug: msg="{{ hostvars[inventory_hostname] }}"
+- debug: msg="{{ hostvars[groups['webservers'][0]] }}"
 
 - name: Configure the haproxy cnf file with hosts
   template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
