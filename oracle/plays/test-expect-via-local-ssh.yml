@@ -1,0 +1,13 @@
+---
+
+- name: text expect
+  hosts: all
+
+  tasks:
+
+    - name: run test file
+      expect:
+        command: ssh {{ ansible_ssh_user }}@{{ ansible_ssh_host }} /home/cloud-user/test_expect.sh
+        responses:
+          'your choice': 'abcd'
+      delegate_to: 127.0.0.1
