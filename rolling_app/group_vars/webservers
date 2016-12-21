@@ -14,15 +14,15 @@ iface: '{{ ansible_default_ipv4.interface }}'
 githubuser: 00799558
 githubpassword: debe103f4ad5a01141b0336e81c5269b0234fc54
 
-repository: "https://{{ githubuser | urlencode }}:{{ githubpassword }}@ghe.aa.com/00799558/mywebapp.git"
+#repository: "https://{{ githubuser | urlencode }}:{{ githubpassword }}@ghe.aa.com/00799558/mywebapp.git"
 
 # this is the sha1sum of V5 of the test webapp.
-webapp_version: release-0.4
+#webapp_version: release-0.4
 
 
 
 # this is the repository that holds our sample webapp
-#repository: https://github.com/bennojoy/mywebapp.git
+repository: https://github.com/bennojoy/mywebapp.git
 
 # this is the sha1sum of V5 of the test webapp.
-#webapp_version: 351e47276cc66b018f4890a04709d4cc3d3edb0d
+webapp_version: 351e47276cc66b018f4890a04709d4cc3d3edb0d
