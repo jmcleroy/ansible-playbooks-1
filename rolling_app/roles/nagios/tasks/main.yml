@@ -32,9 +32,9 @@
   template: src={{ item + ".j2" }}
             dest=/etc/nagios/ansible-managed/{{ item }}
   with_items:
-    - _managed_server_role_webservers.cfg
-    - _managed_server_role_dbservers.cfg
-    - _managed_server_role_lbservers.cfg
+    - webservers.cfg
+    - dbservers.cfg
+    - lbservers.cfg
   notify: restart nagios
 
 - name: start nagios
