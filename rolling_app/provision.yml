@@ -9,7 +9,7 @@
   - common
 
 # Configure and deploy database servers.
-- hosts: dbservers
+- hosts: _managed_server_role_dbservers
 
   roles:
   - mysql
@@ -21,7 +21,7 @@
 # Configure and deploy the web servers. Note that we include two roles here,
 # the 'base-apache' role which simply sets up Apache, and 'web' which includes
 # our example web application.
-- hosts: webservers
+- hosts: _managed_server_role_webservers
 
   roles:
   - base-apache
@@ -32,7 +32,7 @@
   - web
 
 # Configure and deploy the load balancer(s).
-- hosts: lbservers
+- hosts: _managed_server_role_lbservers
 
   roles:
   - haproxy

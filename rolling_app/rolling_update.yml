@@ -1,5 +1,5 @@
 ---
-# This playbook does a rolling update for all webservers serially (one at a time).
+# This playbook does a rolling update for all _managed_server_role_webservers serially (one at a time).
 # Change the value of serial: to adjust the number of server to be updated.
 #
 # The three roles that apply to the webserver hosts will be applied: common,
@@ -8,10 +8,10 @@
 #
 
 # gather facts from monitoring nodes for iptables rules
-- hosts: monitoring
+- hosts: _managed_server_role_monitoring
   tasks: []
 
-- hosts: webservers
+- hosts: _managed_server_role_webservers
   become: yes
   become_user: root
   serial: 1
@@ -28,7 +28,7 @@
 #    delegate_to: "{{ item }}"
 #    become: yes
 #    become_user: root
-#    with_items: "{{ groups.lbservers }}"
+#    with_items: "{{ groups._managed_server_role_lbservers }}"
 
   - name: disable the server in haproxy
     command: echo "disable server myapplb/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
@@ -59,7 +59,7 @@
 #    delegate_to: "{{ item }}"
 #    become: yes
 #    become_user: root
-#    with_items: "{{ groups.lbservers }}"
+#    with_items: "{{ groups._managed_server_role_lbservers }}"
 
 #  - name: re-enable nagios alerts
 #    nagios: 'action=enable_alerts host={{ inventory_hostname }} services=webserver'

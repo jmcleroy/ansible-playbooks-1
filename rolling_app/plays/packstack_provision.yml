@@ -29,9 +29,9 @@
       - db1
       - lb1
 
-  - name: add instances to webservers groups
+  - name: add instances to _managed_server_role_webservers groups
     add_host: name="{{ item.server.metadata.hostname }}"
-                groups=webservers
+                groups=_managed_server_role_webservers
                 ansible_user=cloud-user
                 instance_name={{ item.server.metadata.hostname }}
                 ansible_host="{{ item.server.public_v4 }}"
@@ -40,9 +40,9 @@
     with_items: "{{ newnode.results }}"
     when: (newnode|success) and ("'web' in item")
 
-  - name: add instances to dbservers groups
+  - name: add instances to _managed_server_role_dbservers groups
     add_host: name="{{ item.server.metadata.hostname }}"
-                groups=dbservers
+                groups=_managed_server_role_dbservers
                 ansible_user=cloud-user
                 instance_name={{ item.server.metadata.hostname }}
                 ansible_host="{{ item.server.public_v4 }}"
@@ -51,9 +51,9 @@
     with_items: "{{ newnode.results }}"
     when: (newnode|success) and ("'db' in item")
 
-  - name: add instances to lbservers groups
+  - name: add instances to _managed_server_role_lbservers groups
     add_host: name="{{ item.server.metadata.hostname }}"
-                groups=lbservers
+                groups=_managed_server_role_lbservers
                 ansible_user=cloud-user
                 instance_name={{ item.server.metadata.hostname }}
                 ansible_host="{{ item.server.public_v4 }}"
@@ -87,7 +87,7 @@
   - ../roles/common
 
 # Configure and deploy database servers.
-- hosts: dbservers
+- hosts: _managed_server_role_dbservers
 
   roles:
   - ../roles/mysql
@@ -99,7 +99,7 @@
 # Configure and deploy the web servers. Note that we include two roles here,
 # the 'base-apache' role which simply sets up Apache, and 'web' which includes
 # our example web application.
-- hosts: webservers
+- hosts: _managed_server_role_webservers
 
   roles:
   - ../roles/base-apache
@@ -110,7 +110,7 @@
   - web
 
 # Configure and deploy the load balancer(s).
-- hosts: lbservers
+- hosts: _managed_server_role_lbservers
 
   roles:
   - ../roles/haproxy

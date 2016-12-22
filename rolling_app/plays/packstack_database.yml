@@ -21,14 +21,14 @@
            - net-name: private_network
          meta:
            hostname: "{{ item }}.home.ad"
-           group: dbservers
+           group: _managed_server_role_dbservers
     register: newnode
     with_items:
       - db1
 
   - name: add instances
     add_host: name="{{ item.server.public_v4 }}"
-                groups=dbservers
+                groups=_managed_server_role_dbservers
                 ansible_user=cloud-user
                 instance_name={{ item.server.metadata.hostname }}
                 ansible_ssh_private_key_file='/Users/oatakan/Downloads/default.pem'
@@ -41,7 +41,7 @@
     become: false
     with_items: "{{ newnode.results }}"
 
-- hosts: dbservers
+- hosts: _managed_server_role_dbservers
 
   roles:
   - ../roles/rhn
