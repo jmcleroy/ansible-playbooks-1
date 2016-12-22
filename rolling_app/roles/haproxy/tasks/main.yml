@@ -11,5 +11,9 @@
   template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
   notify: restart haproxy
 
+- name: Configure SELinux to start haproxy on any port
+  seboolean: name=haproxy_connect_any state=true persistent=yes
+  when: sestatus.rc != 0
+
 - name: Start the haproxy service
   service: name=haproxy state=started enabled=yes
