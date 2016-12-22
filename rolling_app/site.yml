@@ -10,7 +10,7 @@
   - common
 
 # Configure and deploy database servers.
-- hosts: *_dbservers
+- hosts: _managed_server_role_dbservers
 
   roles:
   - mysql
@@ -22,7 +22,7 @@
 # Configure and deploy the web servers. Note that we include two roles here,
 # the 'base-apache' role which simply sets up Apache, and 'web' which includes
 # our example web application.
-- hosts: *_webservers
+- hosts: _managed_server_role_webservers
 
   roles:
   - base-apache
@@ -33,7 +33,7 @@
   - web
 
 # Configure and deploy the load balancer(s).
-- hosts: *_lbservers
+- hosts: _managed_server_role_lbservers
 
   roles:
   - haproxy
@@ -43,7 +43,7 @@
   - lb
 
 # Configure and deploy the Nagios monitoring node(s).
-- hosts: *_monitoring
+- hosts: _managed_server_role_monitoring
   become: yes
   become_user: root
   roles:
