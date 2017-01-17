@@ -1,0 +1,19 @@
+---
+# Install apache and serve hello world page
+- name: Deploy Web Server
+  hosts: all
+  tasks:
+  - name: Install web server
+    yum: name=httpd state=present
+
+  - name: firewalld - Allow incoming HTTP Connection
+    firewalld: port=80/tcp state=enabled permanent=yes zone=public immediate=yes
+
+  - name: Place web server file
+    template: src=index.html.j2 dest=/var/www/html/index.html owner=apache group=apache
+    #notify: restart httpd
+
+  - name: Start web server
+    service: name=httpd enabled=yes state=started
+
+
